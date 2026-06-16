@@ -1,0 +1,33 @@
+.DS_Store
+.claude/
+.codex-run/
+
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build and cache output
+dist/
+**/dist/
+.next/
+**/.next/
+out/
+**/out/
+coverage/
+**/coverage/
+playwright-report/
+**/playwright-report/
+test-results/
+**/test-results/
+*.tsbuildinfo
+
+# Runtime logs and local generated files
+*.log
+*.pid
+declutter-api/uploads/

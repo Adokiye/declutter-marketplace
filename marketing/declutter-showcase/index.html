@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Display"; src: url("assets/fonts/bricolagegrotesque-1.woff2") format("woff2"); font-weight: 700 900; font-display: swap; }
+      @font-face { font-family: "Body"; src: url("assets/fonts/inter-7.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; }
+      body { font-family: "Body", "Helvetica Neue", Arial, sans-serif; background: #100d0a; }
+
+      :root {
+        --brand: #6f4e37;
+        --brand-strong: #4d3424;
+        --brand-soft: #f1e8dc;
+        --gold: #eccaa1;
+        --cream: #f4efe7;
+        --ink: #241c16;
+        --muted: #64594e;
+        --line: #e4ddd4;
+        --canvas: #f8f5ef;
+        --green: #16a34a;
+        --red: #dc2626;
+        --blue: #1877f2;
+        --zinc: #18181b;
+      }
+
+      h1, h2, .disp { font-family: "Display", "Body", sans-serif; font-weight: 800; letter-spacing: -2px; }
+      .scene { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+      .bg-cream { background: radial-gradient(1300px 800px at 50% 10%, #fffaf4 0%, var(--cream) 58%, #e7ddcf 100%); color: var(--ink); }
+      .bg-dark { background: radial-gradient(1200px 900px at 72% 18%, #2c2118 0%, #100d0a 72%); color: #fff; }
+
+      .kicker { font-size: 26px; letter-spacing: 9px; text-transform: uppercase; font-weight: 800; font-family: "Body"; }
+      h1 { font-size: 132px; line-height: .95; }
+      h2 { font-size: 76px; line-height: 1.02; }
+      .sub { font-size: 36px; color: rgba(255,255,255,.82); font-weight: 500; }
+      .brandmark { display: inline-flex; align-items: center; gap: 24px; }
+      .logo-badge { width: 104px; height: 104px; border-radius: 26px; background: var(--brand); display: grid; place-items: center; color: #fff; font-size: 56px; box-shadow: 0 26px 70px rgba(111,78,55,.5); }
+
+      .pslot { position: relative; width: 104px; height: 104px; margin: 44px auto 0; }
+      .picon { position: absolute; inset: 0; border-radius: 26px; display: grid; place-items: center; opacity: 0; box-shadow: 0 18px 44px rgba(0,0,0,.5); }
+      .picon.ig { background: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5); }
+      .picon.fb { background: var(--blue); color: #fff; font-family: "Display"; font-weight: 900; font-size: 62px; line-height: 1; }
+      .picon.ig .glyph { width: 38px; height: 38px; border: 5px solid #fff; border-radius: 12px; position: relative; }
+      .picon.ig .glyph::before { content: ""; position: absolute; inset: 8px; border: 4px solid #fff; border-radius: 50%; }
+      .picon.ig .glyph::after { content: ""; position: absolute; top: 5px; right: 5px; width: 5px; height: 5px; border-radius: 50%; background: #fff; }
+
+      .app-frame { overflow: hidden; border-radius: 28px; border: 1px solid var(--line); background: #fff; color: var(--zinc); text-align: left; box-shadow: 0 44px 100px rgba(16,13,10,.38); }
+      .app-top { height: 58px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border-bottom: 1px solid #eee7dd; background: #fff; }
+      .app-brand { font-size: 18px; font-weight: 900; letter-spacing: -.3px; color: #18181b; }
+      .app-pill { border-radius: 999px; background: #f4f4f5; padding: 7px 12px; font-size: 12px; font-weight: 800; color: #52525b; }
+      .app-spacer { flex: 1; }
+      .status-dot { width: 10px; height: 10px; border-radius: 999px; background: var(--green); box-shadow: 0 0 0 5px rgba(22,163,74,.14); }
+      .muted { color: var(--muted); }
+
+      #importRow { margin-top: 36px; position: relative; display: flex; align-items: center; justify-content: center; gap: 28px; }
+      #igGrid { display: grid; grid-template-columns: repeat(3, 148px); grid-auto-rows: 148px; gap: 10px; padding: 18px; background: #fff; border-radius: 28px; box-shadow: 0 40px 90px rgba(16,13,10,.35); }
+      #igGrid .hd { grid-column: 1 / 4; display: flex; align-items: center; gap: 12px; height: 42px; font-weight: 900; font-size: 20px; color: #18181b; }
+      #igGrid .cell { width: 148px; height: 148px; border-radius: 14px; overflow: hidden; background: #eee; }
+      #igGrid .cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .iglogo { width: 42px; height: 42px; border-radius: 13px; background: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5); position: relative; }
+      .iglogo::before { content: ""; position: absolute; inset: 11px; border: 3px solid #fff; border-radius: 50%; }
+      .iglogo::after { content: ""; position: absolute; top: 9px; right: 9px; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+      #lens { position: absolute; width: 194px; height: 194px; border-radius: 999px; border: 8px solid rgba(255,255,255,.96); box-shadow: 0 0 0 4px rgba(111,78,55,.55), 0 30px 60px rgba(0,0,0,.32), inset 0 0 60px rgba(255,255,255,.3); background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.35), rgba(255,255,255,0) 60%); pointer-events: none; }
+      #lens::after { content: ""; position: absolute; right: -40px; bottom: -40px; width: 68px; height: 17px; border-radius: 999px; background: rgba(255,255,255,.96); transform: rotate(45deg); box-shadow: 0 6px 16px rgba(0,0,0,.28); }
+      .arrow { font-size: 84px; color: var(--brand); font-weight: 900; }
+      .market-frame { width: 780px; }
+      .market-ui { height: 486px; display: grid; grid-template-columns: 186px 1fr; background: var(--canvas); }
+      .filters-mini { border-right: 1px solid #e9e2d9; padding: 18px; background: #fbfaf7; }
+      .filter-title { display: flex; align-items: center; gap: 7px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: 900; color: #71717a; }
+      .filter-box { margin-top: 16px; border: 1px solid #e4e4e7; border-radius: 16px; padding: 13px; background: #fff; }
+      .filter-box p { font-size: 11px; text-transform: uppercase; letter-spacing: 1.3px; font-weight: 900; color: #71717a; }
+      .check-row { margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #3f3f46; }
+      .check { width: 15px; height: 15px; border-radius: 4px; border: 2px solid var(--brand); background: var(--brand); display: grid; place-items: center; color: #fff; font-size: 10px; font-weight: 900; }
+      .results-mini { padding: 18px; }
+      .result-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+      .result-head strong { font-size: 16px; color: #27272a; }
+      .select-pill { border: 1px solid #e4e4e7; border-radius: 999px; padding: 8px 13px; background: #fff; font-size: 12px; font-weight: 800; color: #52525b; }
+      .mini-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      .mini-card { position: relative; overflow: hidden; border: 1px solid #e4e4e7; border-radius: 18px; background: #fff; box-shadow: 0 12px 26px rgba(24,24,27,.08); }
+      .mini-card .thumb { height: 130px; position: relative; background: #f4f4f5; overflow: hidden; }
+      .mini-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .mini-card .body { padding: 12px; }
+      .mini-title { font-size: 14px; font-weight: 900; color: #18181b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .mini-meta { margin-top: 4px; font-size: 11px; font-weight: 700; color: #6b6258; }
+      .mini-price { margin-top: 7px; font-size: 18px; font-weight: 900; color: #18181b; font-family: "Display"; }
+      .badge { position: absolute; left: 10px; top: 10px; display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; border-radius: 999px; font-size: 10px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: .5px; font-family: "Body"; }
+      .badge.deal { background: var(--green); }
+      .badge.distress { background: var(--red); }
+      .livepill { position: absolute; top: 9px; right: 9px; background: var(--green); color: #fff; font-size: 10px; font-weight: 900; padding: 6px 10px; border-radius: 999px; font-family: "Body"; box-shadow: 0 8px 20px rgba(22,163,74,.32); }
+      .sync-toast { position: absolute; right: 24px; bottom: 20px; display: flex; align-items: center; gap: 10px; border-radius: 16px; background: #18181b; color: #fff; padding: 13px 16px; font-size: 13px; font-weight: 800; box-shadow: 0 18px 42px rgba(24,24,27,.26); }
+      .cap2 { margin-top: 28px; font-size: 28px; color: #4f463d; font-weight: 700; }
+
+      .product-shot { margin-top: 28px; width: 1480px; display: grid; grid-template-columns: 1050px 390px; gap: 26px; align-items: stretch; text-align: left; }
+      .detail-screen { display: grid; grid-template-columns: 500px 1fr; overflow: hidden; border-radius: 30px; border: 1px solid rgba(255,255,255,.14); background: #fff; color: #18181b; box-shadow: 0 44px 100px rgba(0,0,0,.42); }
+      .gallery { padding: 24px; border-right: 1px solid #e4e4e7; background: #f4f4f5; }
+      .gallery-main { height: 398px; border-radius: 24px; overflow: hidden; background: #fff; }
+      .gallery-main img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .thumb-row { margin-top: 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .thumb-row div { height: 78px; border-radius: 16px; overflow: hidden; background: #fff; border: 2px solid #fff; }
+      .thumb-row img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .detail-copy { padding: 36px; }
+      .detail-copy .cat { font-size: 12px; text-transform: uppercase; letter-spacing: 4px; font-weight: 900; color: #71717a; }
+      .detail-copy h3 { margin-top: 16px; font-size: 54px; line-height: .95; font-family: "Display"; letter-spacing: -1px; color: #18181b; }
+      .tag-row { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
+      .ui-tag { border-radius: 999px; background: #f4f4f5; padding: 9px 13px; font-size: 13px; font-weight: 800; color: #52525b; }
+      .ui-tag.good { background: #dcfce7; color: #15803d; }
+      .ui-tag.dark { background: #18181b; color: #fff; }
+      .detail-price { margin-top: 24px; font-size: 54px; line-height: 1; font-family: "Display"; font-weight: 900; color: #18181b; }
+      .detail-note { margin-top: 7px; font-size: 15px; font-weight: 700; color: #6b6258; }
+      .detail-actions { margin-top: 26px; display: flex; gap: 12px; }
+      .button-primary, .button-secondary { height: 52px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; padding: 0 26px; font-size: 16px; font-weight: 900; }
+      .button-primary { background: var(--brand); color: #fff; }
+      .button-secondary { background: #f4f4f5; color: #27272a; }
+      .feature-grid { margin-top: 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .feature-card { border: 1px solid #e4e4e7; border-radius: 18px; padding: 13px; background: #fff; }
+      .feature-card span { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 900; color: #71717a; }
+      .feature-card strong { display: block; margin-top: 6px; font-size: 13px; color: #18181b; }
+      .ai-panel { border-radius: 30px; background: #fff; color: #18181b; padding: 26px; box-shadow: 0 44px 100px rgba(0,0,0,.42); border: 1px solid rgba(255,255,255,.2); }
+      .ai-panel h3 { font-size: 30px; line-height: 1.05; font-family: "Display"; color: #18181b; }
+      .ai-step { margin-top: 18px; border-radius: 18px; border: 1px solid #e4e4e7; padding: 16px; background: #fbfaf7; }
+      .ai-step span { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.4px; color: #71717a; }
+      .ai-step strong { display: block; margin-top: 6px; font-size: 22px; color: #18181b; }
+      .metric { margin-top: 10px; height: 10px; border-radius: 999px; overflow: hidden; background: #ece7df; }
+      .metric-fill { width: 78%; height: 100%; background: linear-gradient(90deg, var(--brand), var(--green)); border-radius: 999px; transform: scaleX(0); transform-origin: left center; }
+      #dealStamp { margin-top: 20px; border-radius: 18px; background: #dcfce7; color: #166534; padding: 18px; font-size: 20px; font-weight: 900; text-align: center; }
+
+      .checkout-wrap { margin-top: 34px; position: relative; display: grid; place-items: center; }
+      .checkout-screen { width: 1180px; display: grid; grid-template-columns: 1.08fr .92fr; gap: 22px; border-radius: 30px; border: 1px solid var(--line); background: var(--canvas); padding: 24px; box-shadow: 0 44px 100px rgba(16,13,10,.32); color: #18181b; text-align: left; }
+      .checkout-card { border: 1px solid #e4e4e7; border-radius: 26px; background: #fff; padding: 26px; }
+      .checkout-card h3 { font-size: 30px; font-family: "Display"; color: #18181b; }
+      .checkout-card p { color: #5f554a; font-size: 15px; line-height: 1.45; font-weight: 700; }
+      .checkout-item { margin-top: 20px; display: flex; gap: 16px; border-radius: 18px; border: 1px solid #e4e4e7; background: #fafafa; padding: 14px; }
+      .checkout-item img { width: 96px; height: 96px; border-radius: 18px; object-fit: cover; }
+      .input-mock { margin-top: 18px; border: 1px solid #e4e4e7; border-radius: 999px; height: 50px; display: flex; align-items: center; padding: 0 18px; color: #52525b; font-size: 15px; font-weight: 700; }
+      .mode-box { margin-top: 18px; border-radius: 18px; border: 1px solid #e4e4e7; background: #fafafa; padding: 16px; }
+      .mode-box .label { font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase; font-weight: 900; color: #71717a; }
+      .mode-box strong { display: block; margin-top: 7px; font-size: 18px; color: #18181b; }
+      .paybtn { margin-top: 20px; height: 58px; border-radius: 999px; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 20px; font-weight: 900; }
+      .summary-row { display: flex; justify-content: space-between; gap: 22px; color: #52525b; font-size: 18px; font-weight: 700; margin-top: 16px; }
+      .summary-row strong { color: #18181b; font-weight: 900; }
+      .summary-row.muted-row { color: #a1a1aa; text-decoration: line-through; }
+      .summary-total { margin-top: 18px; padding-top: 18px; border-top: 1px solid #e4e4e7; }
+      .summary-total strong { font-size: 28px; font-family: "Display"; }
+      .how-list { margin-top: 20px; display: grid; gap: 11px; font-size: 15px; color: #5f554a; font-weight: 700; line-height: 1.35; }
+      #payok { position: absolute; width: 150px; height: 150px; border-radius: 999px; background: var(--green); color: #fff; display: grid; place-items: center; font-size: 84px; opacity: 0; box-shadow: 0 30px 70px rgba(22,163,74,.42); }
+
+      .order-shell { margin-top: 34px; width: 1180px; display: grid; grid-template-columns: 450px 1fr; gap: 24px; align-items: stretch; text-align: left; }
+      .order-card { border-radius: 30px; border: 1px solid rgba(255,255,255,.14); background: #fff; color: #18181b; overflow: hidden; box-shadow: 0 44px 100px rgba(0,0,0,.42); }
+      .order-head { background: #18181b; color: #fff; padding: 20px 24px; }
+      .order-head strong { display: block; font-size: 24px; font-family: "Display"; }
+      .order-body { padding: 22px; }
+      .order-product { display: flex; gap: 14px; border-radius: 18px; background: #f4f4f5; padding: 14px; }
+      .order-product img { width: 86px; height: 86px; object-fit: cover; border-radius: 16px; }
+      .order-status { margin-top: 18px; display: inline-flex; border-radius: 999px; background: #18181b; color: #fff; padding: 9px 14px; font-size: 12px; text-transform: uppercase; letter-spacing: .8px; font-weight: 900; }
+      .contact-card { margin-top: 18px; border: 1px solid #e4e4e7; border-radius: 18px; padding: 16px; }
+      .contact-card span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1.4px; font-weight: 900; color: #71717a; }
+      .contact-card strong { display: block; margin-top: 8px; color: #18181b; font-size: 18px; }
+      .chat { border-radius: 30px; overflow: hidden; color: #18181b; background: #fff; box-shadow: 0 44px 100px rgba(0,0,0,.42); }
+      .chat .top { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; background: #18181b; color: #fff; }
+      .chat .top strong { font-family: "Display"; font-size: 24px; }
+      .chat .tabs { display: flex; gap: 8px; padding: 12px; border-bottom: 1px solid #e4e4e7; background: #fff; }
+      .chat .tab { flex: 1; padding: 12px 16px; border-radius: 999px; font-size: 14px; font-weight: 900; text-align: center; }
+      .chat .tab.on { background: var(--brand); color: #fff; }
+      .chat .tab.off { background: #f4f4f5; color: #52525b; }
+      .chat .body { padding: 20px; display: flex; flex-direction: column; gap: 11px; height: 330px; background: #f8f8f7; }
+      .bub { max-width: 78%; padding: 12px 16px; border-radius: 18px; font-size: 17px; line-height: 1.32; opacity: 0; font-weight: 700; }
+      .bub.them { background: #fff; color: #18181b; align-self: flex-start; border: 1px solid #e4e4e7; border-bottom-left-radius: 6px; }
+      .bub.me { background: var(--brand); color: #fff; align-self: flex-end; border-bottom-right-radius: 6px; }
+      .chat-input { display: flex; align-items: center; gap: 10px; padding: 14px; border-top: 1px solid #e4e4e7; }
+      .chat-input span { flex: 1; height: 44px; border-radius: 999px; background: #f4f4f5; display: flex; align-items: center; padding: 0 16px; color: #71717a; font-size: 14px; font-weight: 700; }
+      .send-dot { width: 44px; height: 44px; border-radius: 999px; background: var(--brand); color: #fff; display: grid; place-items: center; font-weight: 900; }
+
+      .seller-dash { margin-top: 28px; width: 1120px; overflow: hidden; border-radius: 30px; background: #fff; border: 1px solid var(--line); color: #18181b; text-align: left; box-shadow: 0 44px 100px rgba(16,13,10,.32); }
+      .dash-grid { display: grid; grid-template-columns: 230px 1fr; min-height: 360px; background: var(--canvas); }
+      .side-nav { border-right: 1px solid #e9e2d9; background: #fff; padding: 22px; }
+      .side-nav strong { font-family: "Display"; font-size: 24px; }
+      .side-pill { margin-top: 18px; display: block; border-radius: 999px; padding: 11px 14px; font-size: 14px; font-weight: 900; color: #52525b; }
+      .side-pill.active { background: var(--brand); color: #fff; }
+      .dash-main { padding: 24px; }
+      .dash-tabs { display: inline-flex; gap: 6px; border: 1px solid #e4e4e7; border-radius: 999px; background: #fff; padding: 5px; }
+      .dash-tabs span { border-radius: 999px; padding: 8px 13px; font-size: 12px; font-weight: 900; color: #52525b; }
+      .dash-tabs .active { background: var(--brand); color: #fff; }
+      .dash-row { margin-top: 16px; display: grid; grid-template-columns: 70px 1fr 140px 150px 28px; gap: 14px; align-items: center; border: 1px solid #e4e4e7; border-radius: 20px; background: #fff; padding: 14px; }
+      .dash-row img { width: 66px; height: 66px; object-fit: cover; border-radius: 15px; }
+      .dash-row h3 { font-size: 17px; color: #18181b; }
+      .dash-row p { margin-top: 4px; color: #71717a; font-size: 12px; font-weight: 700; }
+      .dash-row .amount { text-align: right; font-size: 18px; font-weight: 900; color: #18181b; }
+      .status-chip { justify-self: end; border-radius: 999px; background: #18181b; color: #fff; padding: 8px 11px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .6px; }
+      .order-toast { margin: 22px auto 0; width: 720px; background: #fff; border-radius: 22px; padding: 20px 22px; color: var(--ink); box-shadow: 0 28px 70px rgba(16,13,10,.28); text-align: left; display: flex; gap: 18px; align-items: flex-start; border: 1px solid var(--line); }
+      .order-toast .ic { width: 54px; height: 54px; border-radius: 16px; background: var(--green); display: grid; place-items: center; font-size: 30px; color: #fff; flex: 0 0 auto; }
+      .order-toast .t1 { font-size: 23px; font-weight: 900; font-family: "Display"; }
+      .order-toast .t2 { font-size: 18px; color: #5f554a; margin-top: 4px; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="46.5" data-width="1920" data-height="1080">
+
+      <audio id="bgm" class="clip" src="assets/music.mp3" data-start="0" data-duration="46.5" data-track-index="20" data-volume="0.85" data-has-audio="true"></audio>
+
+      <section id="s1" class="scene bg-dark clip" data-start="0" data-duration="4" data-track-index="0">
+        <p id="s1k" class="kicker" style="color:var(--gold)">AI for Nigerian businesses</p>
+        <h1 id="s1t" style="margin-top:24px; max-width:1500px">Selling online<br/>shouldn&rsquo;t live in your DMs.</h1>
+        <p id="s1s" class="sub" style="margin-top:26px">AI handles the workflow, so you do not hire extra staff.</p>
+        <div class="pslot">
+          <div id="pIg" class="picon ig"><span class="glyph"></span></div>
+          <div id="pFb" class="picon fb">f</div>
+        </div>
+      </section>
+
+      <section id="s2" class="scene bg-cream clip" data-start="4" data-duration="10" data-track-index="1">
+        <p id="s2k" class="kicker" style="color:var(--brand)">AI import from Instagram</p>
+        <h2 id="s2h" style="margin-top:16px">Post once. AI builds the storefront.</h2>
+        <div id="importRow">
+          <div id="igGrid">
+            <div class="hd"><span class="iglogo"></span> declutter.ai</div>
+          </div>
+          <div id="s2arr" class="arrow">→</div>
+          <div id="site" class="app-frame market-frame">
+            <div class="app-top">
+              <span class="app-brand">Declutter</span>
+              <span class="app-pill">AI marketplace</span>
+              <span class="app-pill">Best deals</span>
+              <span class="app-spacer"></span>
+              <span class="status-dot"></span>
+            </div>
+            <div class="market-ui">
+              <aside id="siteFilters" class="filters-mini">
+                <p class="filter-title">Filters</p>
+                <div class="filter-box">
+                  <p>AI highlights</p>
+                  <div class="check-row"><span class="check">✓</span> Best deals only</div>
+                  <div class="check-row"><span class="check">✓</span> From Instagram</div>
+                </div>
+                <div class="filter-box">
+                  <p>Category</p>
+                  <div class="check-row"><span class="check">✓</span> Electronics</div>
+                </div>
+                <div class="filter-box">
+                  <p>Location</p>
+                  <div class="check-row">Abeokuta</div>
+                </div>
+              </aside>
+              <div class="results-mini">
+                <div class="result-head">
+                  <strong>12 fresh listings</strong>
+                  <span class="select-pill">Newest</span>
+                </div>
+                <div class="mini-grid">
+                  <div class="mini-card">
+                    <div class="thumb"><img src="assets/products/laptop.jpg" alt=""><span class="badge deal">Good deal</span></div>
+                    <div class="body"><div class="mini-title">MacBook Air M2</div><div class="mini-meta">Lagos · Like new</div><div class="mini-price">₦690,000</div></div>
+                  </div>
+                  <div class="mini-card">
+                    <div class="thumb"><img src="assets/products/headphones.jpg" alt=""><span class="badge deal">Good deal</span></div>
+                    <div class="body"><div class="mini-title">Sony WH-1000XM5</div><div class="mini-meta">Enugu · Good</div><div class="mini-price">₦210,000</div></div>
+                  </div>
+                  <div id="siteCard" class="mini-card">
+                    <div class="thumb"><img id="siteImg" src="assets/products/tv.jpg" alt=""><span class="badge deal">Good deal</span><span class="livepill">Live</span></div>
+                    <div class="body"><div class="mini-title">55&quot; 4K Smart TV</div><div class="mini-meta">Abeokuta · From Instagram</div><div class="mini-price">₦420,000</div></div>
+                  </div>
+                  <div class="mini-card">
+                    <div class="thumb"><img src="assets/products/phone.jpg" alt=""><span class="badge deal">Good deal</span></div>
+                    <div class="body"><div class="mini-title">iPhone 13 Pro</div><div class="mini-meta">Abuja · Verified</div><div class="mini-price">₦520,000</div></div>
+                  </div>
+                  <div class="mini-card">
+                    <div class="thumb"><img src="assets/products/sofa.jpg" alt=""><span class="badge distress">Distress</span></div>
+                    <div class="body"><div class="mini-title">3-Seater Sofa</div><div class="mini-meta">Port Harcourt</div><div class="mini-price">₦240,000</div></div>
+                  </div>
+                  <div class="mini-card">
+                    <div class="thumb"><img src="assets/products/camera.jpg" alt=""><span class="badge deal">Good deal</span></div>
+                    <div class="body"><div class="mini-title">Sony Alpha A7</div><div class="mini-meta">Lagos · Clean</div><div class="mini-price">₦780,000</div></div>
+                  </div>
+                </div>
+                <div id="syncToast" class="sync-toast"><span class="status-dot"></span> AI created, priced, and published this listing</div>
+              </div>
+            </div>
+          </div>
+          <div id="lens"></div>
+        </div>
+        <p id="s2cap" class="cap2">No catalog team. No manual uploads. The AI turns posts into searchable listings.</p>
+      </section>
+
+      <section id="s3" class="scene bg-dark clip" data-start="14" data-duration="8.5" data-track-index="2">
+        <p id="s3k" class="kicker" style="color:var(--gold)">AI prices every product</p>
+        <h2 id="s3h" style="margin-top:14px">The pricing analyst is built in.</h2>
+        <div id="s3Product" class="product-shot">
+          <div class="detail-screen">
+            <div class="gallery">
+              <div class="gallery-main"><img src="assets/products/phone.jpg" alt=""></div>
+              <div class="thumb-row">
+                <div><img src="assets/products/phone.jpg" alt=""></div>
+                <div><img src="assets/products/watch.jpg" alt=""></div>
+                <div><img src="assets/products/headphones.jpg" alt=""></div>
+              </div>
+            </div>
+            <div class="detail-copy">
+              <p class="cat">Electronics</p>
+              <h3>iPhone 13 Pro</h3>
+              <div class="tag-row">
+                <span class="ui-tag">Abuja</span>
+                <span class="ui-tag">Like new</span>
+                <span class="ui-tag good">Good deal</span>
+                <span class="ui-tag dark">From Instagram</span>
+              </div>
+              <div class="detail-price">₦520,000</div>
+              <p class="detail-note">Declutter commission is calculated at checkout.</p>
+              <div class="detail-actions">
+                <span class="button-primary">Buy now</span>
+                <span class="button-secondary">Keep browsing</span>
+              </div>
+              <div class="feature-grid">
+                <div class="feature-card"><span>AI checks</span><strong>Market priced</strong></div>
+                <div class="feature-card"><span>Pickup</span><strong>Abuja</strong></div>
+                <div class="feature-card"><span>AI signal</span><strong>Good deal</strong></div>
+              </div>
+            </div>
+          </div>
+          <div id="aiPanel" class="ai-panel">
+            <h3>Declutter AI does the merchandising work before buyers click.</h3>
+            <div class="ai-step">
+              <span>Listing copy</span>
+              <strong>Title, condition, tags</strong>
+              <div class="metric"><div class="metric-fill"></div></div>
+            </div>
+            <div class="ai-step">
+              <span>Market price</span>
+              <strong>₦560k - ₦640k</strong>
+              <div class="metric"><div class="metric-fill" style="width:62%"></div></div>
+            </div>
+            <div class="ai-step">
+              <span>Deal verdict</span>
+              <strong>Strong value</strong>
+              <div class="metric"><div class="metric-fill" style="width:88%"></div></div>
+            </div>
+            <div id="dealStamp">AI good deal detected</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="s4" class="scene bg-cream clip" data-start="22.5" data-duration="7.5" data-track-index="3">
+        <p id="s4k" class="kicker" style="color:var(--brand)">AI checkout operator</p>
+        <h2 id="s4h" style="margin-top:14px">Payments and unlocks happen automatically.</h2>
+        <div class="checkout-wrap">
+          <div id="checkoutMock" class="checkout-screen">
+            <article class="checkout-card">
+              <h3>Confirm your order</h3>
+              <p style="margin-top:8px">Declutter AI calculates the commission, confirms payment, and unlocks the seller handoff. No sales rep needed to move the order.</p>
+              <div class="checkout-item">
+                <img src="assets/products/phone.jpg" alt="">
+                <div>
+                  <strong style="display:block;font-size:18px;color:#18181b">iPhone 13 Pro</strong>
+                  <p>Abuja · Like new</p>
+                  <strong style="display:block;margin-top:8px;font-size:18px;color:#18181b">₦520,000</strong>
+                </div>
+              </div>
+              <div class="input-mock">receipt@buyer.com</div>
+              <div class="mode-box">
+                <div class="label">Payment mode</div>
+                <strong>AI-calculated 5% commission</strong>
+                <p style="margin-top:5px">Pay the platform fee now. Settle the item price with the seller when you collect it.</p>
+              </div>
+              <div id="paybtn" class="paybtn">Pay ₦26,000</div>
+            </article>
+            <aside class="checkout-card">
+              <h3>Order summary</h3>
+              <div class="summary-row"><span>Item price</span><strong>₦520,000</strong></div>
+              <div class="summary-row"><span>Platform fee (5%)</span><strong>₦26,000</strong></div>
+              <div class="summary-row muted-row"><span>Pay seller offline</span><strong>₦520,000</strong></div>
+              <div class="summary-row summary-total"><span>Total due now</span><strong>₦26,000</strong></div>
+              <div class="how-list">
+                <div>1. AI confirms the Declutter commission payment.</div>
+                <div>2. AI unlocks seller phone, pickup address, and chat.</div>
+                <div>3. AI records the handoff so staff do not chase the order.</div>
+              </div>
+            </aside>
+          </div>
+          <div id="payok">✓</div>
+        </div>
+      </section>
+
+      <section id="s5" class="scene bg-dark clip" data-start="30" data-duration="8" data-track-index="4">
+        <p id="s5k" class="kicker" style="color:var(--gold)">AI support agent</p>
+        <h2 id="s5h" style="margin-top:14px">AI handles routine buyer questions.</h2>
+        <div class="order-shell">
+          <div id="orderCard" class="order-card">
+            <div class="order-head"><strong>Order #dc14a982</strong><span class="muted" style="color:#d4d4d8">AI keeps messages tied to this order</span></div>
+            <div class="order-body">
+              <div class="order-product">
+                <img src="assets/products/phone.jpg" alt="">
+                <div>
+                  <strong style="display:block;font-size:18px">iPhone 13 Pro</strong>
+                  <p class="muted" style="font-weight:700;margin-top:4px">Commission paid · Abuja pickup</p>
+                  <strong style="display:block;margin-top:8px">₦520,000 item value</strong>
+                </div>
+              </div>
+              <span class="order-status">Contact revealed</span>
+              <div class="contact-card">
+                <span>Seller contact</span>
+                <strong>Amaka Okafor · Wuse 2, Abuja</strong>
+                <p class="muted" style="margin-top:5px;font-weight:700">AI revealed these details after payment cleared.</p>
+              </div>
+            </div>
+          </div>
+          <div id="chat" class="chat">
+            <div class="top"><strong>AI order chat</strong><span>Live</span></div>
+            <div class="tabs"><span class="tab on">Declutter AI</span><span class="tab off">Seller</span></div>
+            <div class="body">
+              <div class="bub them" id="b1">I paid the commission. Can I see pickup details?</div>
+              <div class="bub me" id="b2">AI confirmed payment. Seller contact is now revealed for this order.</div>
+              <div class="bub them" id="b3">Hi Amaka, is Wuse this evening okay?</div>
+              <div class="bub me" id="b4">AI prepared the handoff. Seller can reply when pickup time changes.</div>
+              <div class="bub them" id="b5">Great. No one had to call me manually.</div>
+              <div class="bub me" id="b6">Routine support is automated, so your team stays lean.</div>
+            </div>
+            <div class="chat-input"><span>Type a message...</span><div class="send-dot">→</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="s6" class="scene bg-cream clip" data-start="38" data-duration="4.5" data-track-index="5">
+        <p id="s6k" class="kicker" style="color:var(--brand)">AI operations desk</p>
+        <h2 id="s6h" style="margin-top:14px">Orders and follow-ups run without extra staff.</h2>
+        <div id="s6dash" class="seller-dash">
+          <div class="app-top">
+            <span class="app-brand">Declutter</span>
+            <span class="app-pill">AI seller ops</span>
+            <span class="app-spacer"></span>
+            <span class="app-pill">AI alert</span>
+          </div>
+          <div class="dash-grid">
+            <aside class="side-nav">
+              <strong>AI Console</strong>
+              <span class="side-pill">Listings</span>
+              <span class="side-pill active">Orders</span>
+              <span class="side-pill">Payouts</span>
+            </aside>
+            <main class="dash-main">
+              <div class="dash-tabs"><span>All</span><span class="active">Awaiting pickup</span><span>In escrow</span><span>Completed</span></div>
+              <div class="dash-row">
+                <img src="assets/products/phone.jpg" alt="">
+                <div><h3>iPhone 13 Pro</h3><p>Today · Order #dc14a982</p></div>
+                <div class="amount">₦520,000</div>
+                <span class="status-chip">Commission paid</span>
+                <strong>›</strong>
+              </div>
+              <div class="dash-row">
+                <img src="assets/products/chair.jpg" alt="">
+                <div><h3>Accent Chair</h3><p>Yesterday · Order #90ab21fe</p></div>
+                <div class="amount">₦120,000</div>
+                <span class="status-chip">Completed</span>
+                <strong>›</strong>
+              </div>
+            </main>
+          </div>
+        </div>
+        <div id="s6wa" class="order-toast">
+          <div class="ic">✓</div>
+          <div><div class="t1">AI sent the order notification</div><div class="t2">Email, WhatsApp alert, and pickup next steps go out without admin staff.</div></div>
+        </div>
+      </section>
+
+      <section id="s7" class="scene bg-dark clip" data-start="42.5" data-duration="4" data-track-index="6">
+        <div class="brandmark"><span id="s7logo" class="logo-badge">◧</span><h1 id="s7t" style="font-size:104px">Declutter <span style="font-weight:900">AI</span></h1></div>
+        <p id="s7s" class="sub" style="margin-top:28px">AI handles listings, pricing, checkout, chats, and orders · declutter.ai</p>
+      </section>
+
+    </div>
+
+    <script>
+      const PRODUCTS = [
+        {img:"phone", t:"iPhone 13 Pro", p:"₦520,000", c:"Abuja", b:"deal"},
+        {img:"laptop", t:"MacBook Air M2", p:"₦690,000", c:"Lagos", b:"deal"},
+        {img:"sneaker", t:"Nike Invincible 3", p:"₦190,000", c:"Ibadan", b:""},
+        {img:"sofa", t:"3-Seater Sofa", p:"₦240,000", c:"Port Harcourt", b:"distress"},
+        {img:"headphones", t:"Sony WH-1000XM5", p:"₦210,000", c:"Enugu", b:"deal"},
+        {img:"tv", t:'55" 4K Smart TV', p:"₦420,000", c:"Abeokuta", b:"distress"},
+        {img:"watch", t:"Smartwatch S8", p:"₦85,000", c:"Kano", b:""},
+        {img:"camera", t:"Sony Alpha A7", p:"₦780,000", c:"Lagos", b:"deal"},
+        {img:"fridge", t:"Double-Door Fridge", p:"₦380,000", c:"Benin", b:""}
+      ];
+
+      const ig = document.getElementById("igGrid");
+      PRODUCTS.slice(0,9).forEach((pr) => {
+        const c = document.createElement("div");
+        c.className = "cell";
+        const im = document.createElement("img");
+        im.src = "assets/products/" + pr.img + ".jpg";
+        im.alt = "";
+        c.appendChild(im);
+        ig.appendChild(c);
+      });
+
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      tl.from("#s1k", { y:20, opacity:0, duration:.5 }, .1)
+        .from("#s1t", { y:60, opacity:0, duration:.8, ease:"power3.out" }, .3)
+        .from("#s1s", { y:28, opacity:0, duration:.55, ease:"power2.out" }, .9);
+
+      const seq = [["#pIg",1.2],["#pFb",1.65],["#pIg",2.1],["#pFb",2.55],["#pIg",3.0],["#pFb",3.45]];
+      seq.forEach(([sel, t]) => {
+        tl.set(sel, { autoAlpha:1 }, t)
+          .fromTo(sel, { scale:.72 }, { scale:1, duration:.25, ease:"back.out(2)" }, t)
+          .set(sel, { autoAlpha:0 }, t + 0.36);
+      });
+
+      gsap.set("#lens", { left:150, top:158, scale:.9, opacity:1 });
+      gsap.set("#siteCard", { opacity:0, scale:.7, y:20 });
+      gsap.set("#syncToast", { autoAlpha:0, y:16 });
+      tl.from("#s2k", { y:20, opacity:0, duration:.55 }, 4.15)
+        .from("#s2h", { y:40, opacity:0, duration:.7 }, 4.45)
+        .from("#igGrid", { x:-80, opacity:0, duration:.8, ease:"power3.out" }, 5.1)
+        .from("#site", { x:80, opacity:0, duration:.8, ease:"power3.out" }, 5.35)
+        .from("#s2arr", { scale:0, opacity:0, duration:.5, ease:"back.out(2)" }, 6.05)
+        .from("#siteFilters", { x:-28, opacity:0, duration:.55, ease:"power2.out" }, 6.35)
+        .fromTo("#lens", { left:176, top:150 }, { left:350, top:314, duration:1.15, ease:"power1.inOut" }, 6.7)
+        .to("#lens", { left:560, top:300, duration:1.15, ease:"power1.inOut" }, 8.05)
+        .to("#lens", { scale:1.08, duration:.4, yoyo:true, repeat:1 }, 9.45)
+        .to("#s2arr", { scale:1.25, duration:.4, yoyo:true, repeat:1, ease:"power2.inOut" }, 9.65)
+        .to("#lens", { opacity:0, duration:.35 }, 10.15)
+        .fromTo("#siteCard", { opacity:0, scale:.7, y:20 }, { opacity:1, scale:1, y:0, duration:1.05, ease:"back.out(1.5)" }, 9.95)
+        .from("#siteCard .badge", { scale:0, opacity:0, duration:.42, ease:"back.out(2)" }, 11.0)
+        .from("#siteCard .livepill", { scale:0, opacity:0, duration:.45, ease:"back.out(2)" }, 11.25)
+        .to("#syncToast", { autoAlpha:1, y:0, duration:.55, ease:"power2.out" }, 11.65)
+        .from("#s2cap", { opacity:0, y:20, duration:.6 }, 12.05);
+
+      gsap.set("#aiPanel", { autoAlpha:0, x:60 });
+      gsap.set("#dealStamp", { autoAlpha:0, scale:.75 });
+      tl.from("#s3k", { y:20, opacity:0, duration:.55 }, 14.15)
+        .from("#s3h", { y:40, opacity:0, duration:.7 }, 14.45)
+        .from("#s3Product .detail-screen", { y:60, opacity:0, duration:.9, ease:"power3.out" }, 15.15)
+        .from(".detail-copy .ui-tag", { scale:0, opacity:0, duration:.34, stagger:.1, ease:"back.out(2)" }, 16.1)
+        .to("#aiPanel", { autoAlpha:1, x:0, duration:.85, ease:"power3.out" }, 16.7)
+        .to(".metric-fill", { scaleX:1, duration:.9, stagger:.24, ease:"power2.out" }, 17.65)
+        .from(".ai-step", { y:18, opacity:0, duration:.45, stagger:.22, ease:"power2.out" }, 17.85)
+        .fromTo("#dealStamp", { autoAlpha:0, scale:.75 }, { autoAlpha:1, scale:1, duration:.55, ease:"back.out(2)" }, 19.4);
+
+      gsap.set("#payok", { opacity:0, scale:.4 });
+      tl.from("#s4k", { y:20, opacity:0, duration:.55 }, 22.65)
+        .from("#s4h", { y:40, opacity:0, duration:.7 }, 23.0)
+        .from("#checkoutMock", { y:70, opacity:0, duration:.9, ease:"back.out(1.25)" }, 23.75)
+        .from(".summary-row", { x:30, opacity:0, duration:.45, stagger:.16, ease:"power2.out" }, 24.85)
+        .to("#paybtn", { scale:.95, duration:.22, yoyo:true, repeat:1, ease:"power2.inOut" }, 26.4)
+        .fromTo("#payok", { opacity:0, scale:.4 }, { opacity:1, scale:1, duration:.7, ease:"back.out(1.8)" }, 27.0)
+        .to("#checkoutMock", { scale:.985, opacity:.82, duration:.6 }, 27.0);
+
+      tl.from("#s5k", { y:20, opacity:0, duration:.55 }, 30.15)
+        .from("#s5h", { y:40, opacity:0, duration:.7 }, 30.5)
+        .from("#orderCard", { x:-70, opacity:0, duration:.8, ease:"power3.out" }, 31.1)
+        .from("#chat", { x:70, opacity:0, duration:.8, ease:"power3.out" }, 31.35);
+      ["#b1","#b2","#b3","#b4","#b5","#b6"].forEach((b, i) => {
+        tl.fromTo(b, { autoAlpha:0, y:22 }, { autoAlpha:1, y:0, duration:.4, ease:"power2.out" }, 32.1 + i*.75);
+      });
+
+      tl.from("#s6k", { y:20, opacity:0, duration:.4 }, 38.1)
+        .from("#s6h", { y:28, opacity:0, duration:.55 }, 38.35)
+        .from("#s6dash", { y:55, opacity:0, duration:.7, ease:"power3.out" }, 38.85)
+        .from(".dash-row", { x:38, opacity:0, duration:.45, stagger:.2, ease:"power2.out" }, 39.5)
+        .from("#s6wa", { y:40, opacity:0, duration:.55, ease:"back.out(1.5)" }, 40.55)
+        .from("#s6wa .ic", { scale:0, duration:.45, ease:"back.out(2)" }, 40.75);
+
+      tl.from("#s7logo", { scale:0, rotate:-90, duration:.7, ease:"back.out(1.7)" }, 42.75)
+        .from("#s7t", { y:40, opacity:0, duration:.75 }, 43.05)
+        .from("#s7s", { opacity:0, y:24, duration:.7 }, 43.55);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

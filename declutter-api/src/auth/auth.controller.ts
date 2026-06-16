@@ -1,0 +1,23 @@
+import { Body, Controller, Post } from "@nestjs/common";
+import { AuthService } from "./auth.service";
+import { CompleteProfileDto, RequestOtpDto, VerifyOtpDto } from "./dto";
+
+@Controller("auth")
+export class AuthController {
+  constructor(private readonly auth: AuthService) {}
+
+  @Post("otp/request")
+  requestOtp(@Body() dto: RequestOtpDto) {
+    return this.auth.requestOtp(dto.phone);
+  }
+
+  @Post("otp/verify")
+  verifyOtp(@Body() dto: VerifyOtpDto) {
+    return this.auth.verifyOtp(dto);
+  }
+
+  @Post("profile")
+  completeProfile(@Body() dto: CompleteProfileDto) {
+    return this.auth.completeProfile(dto);
+  }
+}
