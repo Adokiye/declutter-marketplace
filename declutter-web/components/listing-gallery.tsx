@@ -45,7 +45,7 @@ export function ListingGallery({ images, title }: { images: GalleryImage[]; titl
             fill
             sizes="(max-width: 1024px) 100vw, 60vw"
             priority={i === 0}
-            className={`object-cover transition-opacity duration-700 ease-in-out ${i === active ? "opacity-100" : "opacity-0"}`}
+            className={`object-contain transition-opacity duration-700 ease-in-out ${i === active ? "opacity-100" : "opacity-0"}`}
           />
         ))}
 
@@ -70,10 +70,10 @@ export function ListingGallery({ images, title }: { images: GalleryImage[]; titl
               key={img.id ?? img.url}
               onClick={() => setActive(i)}
               onMouseEnter={() => setActive(i)}
-              className={`relative aspect-square overflow-hidden rounded-xl ring-2 transition ${i === active ? "ring-brand" : "ring-transparent hover:ring-zinc-300"}`}
+              className={`relative aspect-square overflow-hidden rounded-xl bg-white ring-2 transition ${i === active ? "ring-brand" : "ring-transparent hover:ring-zinc-300"}`}
               aria-label={`Image ${i + 1}`}
             >
-              <Image src={img.url} alt={img.altText ?? title} fill sizes="20vw" className="object-cover" />
+              <Image src={img.url} alt={img.altText ?? title} fill sizes="20vw" className="object-contain" />
             </button>
           ))}
         </div>

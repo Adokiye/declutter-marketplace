@@ -157,8 +157,7 @@ export class InstagramImportService {
     // listings are the ones that go through draft/moderation.
     const now = new Date().toISOString();
 
-    // IG CDN URLs expire — download each image and persist it to our own storage
-    // so the listing keeps working. Fall back to the original URL on failure.
+    // IG CDN URLs expire, so download each image and persist it to our own storage.
     const persistedImages = await this.persistImages(post.imageUrls);
 
     const deal = await this.dealEvaluator.evaluate({
@@ -253,13 +252,14 @@ export class InstagramImportService {
       .whereNot("status", "sold");
   }
 
-  /** Download IG images and re-host them via StorageService; keep the original URL if a download fails. */
+  /** Download IG images and re-host them via StorageService. */
   private async persistImages(urls: string[]): Promise<string[]> {
     const out: string[] = [];
     for (const url of urls) {
       try {
         out.push(await this.storage.uploadFromUrl(url));
       } catch (err) {
+        if (this.storage.isCloudinary) throw err;
         this.log.warn(`image persist failed, keeping source url: ${err instanceof Error ? err.message : err}`);
         out.push(url);
       }

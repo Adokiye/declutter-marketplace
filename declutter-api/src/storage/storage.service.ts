@@ -21,6 +21,12 @@ const MIME_EXT: Record<string, string> = {
   "image/avif": "avif"
 };
 
+function cleanConfigValue(value?: string | null) {
+  const trimmed = value?.trim();
+  if (!trimmed || trimmed.includes("<") || trimmed.includes(">")) return undefined;
+  return trimmed;
+}
+
 @Injectable()
 export class StorageService {
   private readonly log = new Logger("Storage");
@@ -29,15 +35,19 @@ export class StorageService {
   private readonly publicBaseUrl: string;
 
   constructor(private readonly config: ConfigService) {
-    const url = config.get<string>("CLOUDINARY_URL");
-    const cloudName = config.get<string>("CLOUDINARY_CLOUD_NAME");
-    const apiKey = config.get<string>("CLOUDINARY_API_KEY");
-    const apiSecret = config.get<string>("CLOUDINARY_API_SECRET");
+    const url = cleanConfigValue(config.get<string>("CLOUDINARY_URL"));
+    const cloudName = cleanConfigValue(config.get<string>("CLOUDINARY_CLOUD_NAME"));
+    const apiKey = cleanConfigValue(config.get<string>("CLOUDINARY_API_KEY"));
+    const apiSecret = cleanConfigValue(config.get<string>("CLOUDINARY_API_SECRET"));
 
     if (url) {
-      // The SDK auto-reads CLOUDINARY_URL from env, but configure explicitly so
-      // it works regardless of how env is loaded.
-      cloudinary.config({ secure: true });
+      const parsed = new URL(url);
+      cloudinary.config({
+        cloud_name: parsed.hostname,
+        api_key: decodeURIComponent(parsed.username),
+        api_secret: decodeURIComponent(parsed.password),
+        secure: true
+      });
       this.useCloudinary = true;
     } else if (cloudName && apiKey && apiSecret) {
       cloudinary.config({ cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret, secure: true });
@@ -54,6 +64,10 @@ export class StorageService {
   /** True when files are written to the local uploads/ dir (so main.ts can serve them statically). */
   get isLocal() {
     return !this.useCloudinary;
+  }
+
+  get isCloudinary() {
+    return this.useCloudinary;
   }
 
   get localDir() {
